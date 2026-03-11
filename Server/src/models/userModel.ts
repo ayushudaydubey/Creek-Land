@@ -8,4 +8,6 @@ export interface userModel {
   city: string
   state: string
   zip: string
+  password: string
+  role?: "user" | "admin" | undefined
 }

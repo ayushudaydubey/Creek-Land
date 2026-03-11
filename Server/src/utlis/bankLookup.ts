@@ -1,10 +1,23 @@
+import axios from "axios";
+
 export const getBankName = async (routingNumber: string) => {
 
-  const banks: any = {
-    "021000021": "JPMorgan Chase Bank",
-    "011000015": "Bank of America"
-  };
+  try {
 
-  return banks[routingNumber] || "Unknown Bank";
+    const url = `https://www.routingnumbers.info/api/data.json?rn=${routingNumber}`;
+
+    const response = await axios.get(url);
+
+    if (response.data.code === 200) {
+      return response.data.customer_name;
+    }
+
+    throw new Error("Invalid routing number");
+
+  } catch (error) {
+
+    throw new Error("Bank lookup failed");
+
+  }
 
 };

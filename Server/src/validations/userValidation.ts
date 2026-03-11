@@ -10,3 +10,8 @@ export const userSchema = z.object({
   state: z.string(),
   zip: z.string()
 })
+
+export const userRegisterSchema = userSchema.extend({
+  password: z.string().min(6),
+  role: z.enum(["user", "admin"]).optional()
+})

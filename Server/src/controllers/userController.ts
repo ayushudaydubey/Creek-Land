@@ -1,13 +1,14 @@
 import { Request, Response } from "express"
-import { registerUser } from "../services/userService"
-import { userSchema } from "../validations/userValidation"
+import { registerUser, loginUser } from "../services/userService"
+import { userSchema, userRegisterSchema } from "../validations/userValidation"
 
 export const registerUserController = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const validatedData = userSchema.parse(req.body)
+
+    const validatedData = userRegisterSchema.parse(req.body)
 
     const user = await registerUser(validatedData)
 
@@ -15,10 +16,34 @@ export const registerUserController = async (
       message: "User registered successfully",
       data: user
     })
-  } catch (error) {
+
+  } catch (error:any) {
+
     res.status(400).json({
-      message: "Invalid data",
-      error
+      message: error.message
+    })
+  }
+}
+
+export const loginUserController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+
+    const { email, password } = req.body
+
+    const result = await loginUser(email, password)
+
+    res.json({
+      message: "Login successful",
+      data: result
+    })
+
+  } catch (error:any) {
+
+    res.status(400).json({
+      message: error.message
     })
   }
 }

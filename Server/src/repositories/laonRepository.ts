@@ -1,4 +1,5 @@
 import { db } from "../config/db";
+import { IdentityPayload } from "../models/loanModel";
 
 // export const saveBankDetails = async (
 //   applicationId: number,
@@ -43,30 +44,28 @@ export const saveBankDetails = async (
 
 };
 
-export const saveIdentityDetails = async (data: import("../models/loanModel").IdentityPayload): Promise<{ id: number } | null> => {
+export const saveIdentityDetails = async (
+  data: IdentityPayload
+): Promise<{ id: number }> => {
 
   const query = `
-  UPDATE loan_applications
-  SET 
-    ssn = $1,
-    driver_license = $2,
-    dl_state = $3
-  WHERE id = $4
+  INSERT INTO identity_details
+  (application_id, ssn, driver_license, dl_state)
+  VALUES ($1, $2, $3, $4)
   RETURNING id
   `;
 
   const values = [
+    data.applicationId,
     data.ssn,
     data.driverLicense,
-    data.state,
-    data.applicationId
+    data.state
   ];
 
   const result = await db.query(query, values);
 
-  return result.rows[0] || null;
-
-}
+  return result.rows[0];
+};
 
 
 
