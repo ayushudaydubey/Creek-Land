@@ -31,3 +31,13 @@ export interface ConsentPayload {
   trustedFormCertUrl?: string
 
 }
+
+export interface SubmitApplicationPayload {
+
+  applicationId: number
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+  ipAddress?: string
+
+}

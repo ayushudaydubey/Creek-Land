@@ -141,3 +141,43 @@ export const saveConsentDetails = async (
   return result.rows[0]
 
 }
+
+
+export const submitLoanApplication = async (
+  applicationId: number,
+  utmSource?: string,
+  utmMedium?: string,
+  utmCampaign?: string,
+  ipAddress?: string
+) => {
+
+  const query = `
+  UPDATE loan_applications
+  SET
+    utm_source = $1,
+    utm_medium = $2,
+    utm_campaign = $3,
+    ip_address = $4,
+    status = 'submitted',
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = $5
+  RETURNING id, status
+  `
+
+  const values = [
+    utmSource || null,
+    utmMedium || null,
+    utmCampaign || null,
+    ipAddress || null,
+    applicationId
+  ]
+
+  const result = await db.query(query, values)
+
+  if (result.rows.length === 0) {
+    throw new Error(`Application with id ${applicationId} not found`)
+  }
+
+  return result.rows[0]
+
+}
