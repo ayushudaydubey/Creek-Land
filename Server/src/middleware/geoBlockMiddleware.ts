@@ -1,14 +1,28 @@
-import { Request, Response, NextFunction } from "express"
-import { allowedCountries } from "../constants/countires"
+import geoip from "geoip-lite"
+import requestIp from "request-ip"
 
-export const geoBlock = (req: Request, res: Response, next: NextFunction) => {
-  const country = req.headers["cf-ipcountry"] as string
+export const geoBlockMiddleware = (req: any, res: any, next: any) => {
+    const ip = requestIp.getClientIp(req) || ""
 
-  if (country && !allowedCountries.includes(country)) {
-    return res.status(403).json({
-      message: "Access denied"
-    })
-  }
+    // Allow local development and common localhost addresses
+    if (
+        process.env.NODE_ENV === "development" ||
+        ip === "::1" ||
+        ip === "127.0.0.1" ||
+        ip.startsWith("::ffff:127.0.0.1")
+    ) {
+        return next()
+    }
 
-  next()
+    const geo = geoip.lookup(ip)
+
+    const allowedCountries = ["US", "CA", "IN"]
+
+    if (!geo || !allowedCountries.includes(geo.country)) {
+        return res.status(403).json({
+            message: "Access blocked in your region"
+        })
+    }
+
+    next()
 }
