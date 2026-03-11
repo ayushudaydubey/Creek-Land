@@ -1,7 +1,7 @@
-import { IdentityPayload, BankPayload } from "../models/loanModel"
+import { IdentityPayload, BankPayload, LoanRequestPayload, ConsentPayload } from "../models/loanModel"
 import { encrypt } from "../utlis/encryption"
 import { getBankName } from "../utlis/bankLookup"
-import { saveIdentityDetails, saveBankDetails } from "../repositories/laonRepository"
+import { saveIdentityDetails, saveBankDetails, saveLoanRequest, saveConsentDetails } from "../repositories/laonRepository"
 
 export const saveIdentity = async (data: IdentityPayload) => {
 
@@ -38,6 +38,43 @@ export const saveBank = async (data: BankPayload) => {
   return {
     applicationId: result.id,
     bankName
+  }
+
+}
+
+
+
+export const saveLoan = async (data: LoanRequestPayload) => {
+
+  const result = await saveLoanRequest(
+    data.applicationId,
+    data.loanAmount,
+    data.loanPurpose
+  )
+
+  return {
+    applicationId: result.id,
+    loanAmount: data.loanAmount,
+    loanPurpose: data.loanPurpose
+  }
+
+}
+
+
+export const saveConsent = async (data: ConsentPayload) => {
+
+  const result = await saveConsentDetails(
+    data.applicationId,
+    data.smsConsent,
+    data.callConsent,
+    data.emailConsent,
+    data.jornayaLeadId,
+    data.trustedFormCertUrl
+  )
+
+  return {
+    applicationId: result.id,
+    consentSaved: true
   }
 
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { saveBank, saveIdentity } from "../services/loanService"
+import { saveBank, saveConsent, saveIdentity, saveLoan } from "../services/loanService"
 
 export const identityController = async (req: Request, res: Response) => {
 
@@ -72,3 +72,83 @@ export const bankController = async (req: Request, res: Response) => {
   }
 
 };
+
+
+
+export const loanRequestController = async (req: Request, res: Response) => {
+
+  try {
+
+    const { applicationId, loanAmount, loanPurpose } = req.body
+
+    if (!applicationId || !loanAmount || !loanPurpose) {
+      return res.status(400).json({
+        message: "Missing required fields"
+      })
+    }
+
+    const result = await saveLoan({
+      applicationId,
+      loanAmount,
+      loanPurpose
+    })
+
+    res.json({
+      message: "Loan request saved",
+      data: result
+    })
+
+  } catch (error: any) {
+
+    res.status(500).json({
+      message: error.message
+    })
+
+  }
+
+}
+
+
+
+export const consentController = async (req: Request, res: Response) => {
+
+  try {
+
+    const {
+      applicationId,
+      smsConsent,
+      callConsent,
+      emailConsent,
+      jornayaLeadId,
+      trustedFormCertUrl
+    } = req.body
+
+    if (!applicationId) {
+      return res.status(400).json({
+        message: "Application ID required"
+      })
+    }
+
+    const result = await saveConsent({
+      applicationId,
+      smsConsent,
+      callConsent,
+      emailConsent,
+      jornayaLeadId,
+      trustedFormCertUrl
+    })
+
+    res.json({
+      message: "Consent recorded",
+      data: result
+    })
+
+  } catch (error: any) {
+
+    res.status(500).json({
+      message: error.message
+    })
+
+  }
+
+}

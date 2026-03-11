@@ -67,3 +67,77 @@ export const saveIdentityDetails = async (data: import("../models/loanModel").Id
   return result.rows[0] || null;
 
 }
+
+
+
+export const saveLoanRequest = async (
+  applicationId: number,
+  loanAmount: number,
+  loanPurpose: string
+) => {
+
+  const query = `
+  UPDATE loan_applications
+  SET
+    loan_amount = $1,
+    loan_purpose = $2
+  WHERE id = $3
+  RETURNING id
+  `
+
+  const values = [
+    loanAmount,
+    loanPurpose,
+    applicationId
+  ]
+
+  const result = await db.query(query, values)
+
+  if (result.rows.length === 0) {
+    throw new Error(`Application with id ${applicationId} not found`)
+  }
+
+  return result.rows[0]
+
+}
+
+
+export const saveConsentDetails = async (
+  applicationId: number,
+  smsConsent: boolean,
+  callConsent: boolean,
+  emailConsent: boolean,
+  jornayaLeadId?: string,
+  trustedFormCertUrl?: string
+) => {
+
+  const query = `
+  UPDATE loan_applications
+  SET
+    sms_consent = $1,
+    call_consent = $2,
+    email_consent = $3,
+    jornaya_lead_id = $4,
+    trustedform_cert_url = $5
+  WHERE id = $6
+  RETURNING id
+  `
+
+  const values = [
+    smsConsent,
+    callConsent,
+    emailConsent,
+    jornayaLeadId || null,
+    trustedFormCertUrl || null,
+    applicationId
+  ]
+
+  const result = await db.query(query, values)
+
+  if (result.rows.length === 0) {
+    throw new Error(`Application with id ${applicationId} not found`)
+  }
+
+  return result.rows[0]
+
+}

@@ -12,3 +12,22 @@ export interface IdentityPayload {
   driverLicense: string
   state: string
 }
+
+export interface LoanRequestPayload {
+
+  applicationId: number
+  loanAmount: number
+  loanPurpose: string
+
+}
+
+export interface ConsentPayload {
+
+  applicationId: number
+  smsConsent: boolean
+  callConsent: boolean
+  emailConsent: boolean
+  jornayaLeadId?: string
+  trustedFormCertUrl?: string
+
+}
