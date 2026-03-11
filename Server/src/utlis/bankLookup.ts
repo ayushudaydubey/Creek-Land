@@ -1,9 +1,10 @@
-import axios from "axios"
+export const getBankName = async (routingNumber: string) => {
 
-export const lookupBank = async (routing: string) => {
-  const res = await axios.get(
-    `https://www.routingnumbers.info/api/data.json?rn=${routing}`
-  )
+  const banks: any = {
+    "021000021": "JPMorgan Chase Bank",
+    "011000015": "Bank of America"
+  };
 
-  return res.data
-}
+  return banks[routingNumber] || "Unknown Bank";
+
+};

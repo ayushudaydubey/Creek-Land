@@ -1,6 +1,7 @@
-import { IdentityPayload } from "../models/loanModel"
+import { IdentityPayload, BankPayload } from "../models/loanModel"
 import { encrypt } from "../utlis/encryption"
-import { saveIdentityDetails } from "../repositories/laonRepository"
+import { getBankName } from "../utlis/bankLookup"
+import { saveIdentityDetails, saveBankDetails } from "../repositories/laonRepository"
 
 export const saveIdentity = async (data: IdentityPayload) => {
 
@@ -16,5 +17,27 @@ export const saveIdentity = async (data: IdentityPayload) => {
   }
 
   return await saveIdentityDetails(payload)
+
+}
+
+export const saveBank = async (data: BankPayload) => {
+
+  const bankName = await getBankName(data.routingNumber)
+
+  const result = await saveBankDetails(
+    data.applicationId,
+    data.accountNumber,
+    data.routingNumber,
+    bankName
+  )
+
+  if (!result) {
+    throw new Error(`Application with id ${data.applicationId} not found`)
+  }
+
+  return {
+    applicationId: result.id,
+    bankName
+  }
 
 }
