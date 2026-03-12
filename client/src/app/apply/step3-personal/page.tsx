@@ -13,13 +13,10 @@ export default function Step3(){
   const lookupBank = async () => {
     if(!routingNumber) return
     try{
-      // call public routing numbers API to show bank name before submit
-      const res = await fetch(`https://www.routingnumbers.info/api/data.json?rn=${routingNumber}`)
-      if(!res.ok) return
-      const data = await res.json()
-      if(data && data.customer_name){
-        setBankName(data.customer_name)
-      }
+      // call our backend to avoid CORS issues
+      const res = await API.get('/loan/bank-lookup', { params: { routingNumber } })
+      const bankNameFromServer = res?.data?.data?.bankName ?? null
+      if (bankNameFromServer) setBankName(bankNameFromServer)
     }catch(e){
       console.warn(e)
     }

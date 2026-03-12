@@ -212,3 +212,24 @@ export const createApplicationController = async (req: Request, res: Response) =
   }
 
 }
+
+export const bankLookupController = async (req: Request, res: Response) => {
+  try {
+    const routingNumber = String(req.query.routingNumber || req.body.routingNumber || "")
+    if (!routingNumber) {
+      return res.status(400).json({ message: "routingNumber query param required" })
+    }
+
+    // call util directly (it may throw)
+    const { getBankName } = await import("../utlis/bankLookup")
+    try {
+      const bankName = await getBankName(routingNumber)
+      return res.json({ message: "Bank lookup successful", data: { bankName } })
+    } catch (err: any) {
+      return res.status(200).json({ message: "Bank lookup failed", data: { bankName: null } })
+    }
+  } catch (error: any) {
+    res.status(500).json({ message: error.message })
+  }
+
+}

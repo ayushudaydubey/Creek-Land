@@ -18,7 +18,7 @@ export const saveBankDetails = async (
   applicationId: number,
   accountNumber: string,
   routingNumber: string,
-  bankName: string
+  bankName: string | null
 ): Promise<{ id: number } | null> => {
 
   const query = `
@@ -171,7 +171,7 @@ export const submitLoanApplication = async (
     utm_medium = $2,
     utm_campaign = $3,
     ip_address = $4,
-    status = 'submitted',
+    status = 'pending',
     updated_at = CURRENT_TIMESTAMP
   WHERE id = $5
   RETURNING id, status

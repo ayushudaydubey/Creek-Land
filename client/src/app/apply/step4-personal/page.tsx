@@ -7,6 +7,8 @@ export default function Step4(){
   const [smsConsent,setSmsConsent] = useState(true)
   const [callConsent,setCallConsent] = useState(true)
   const [emailConsent,setEmailConsent] = useState(false)
+  const [loanAmount,setLoanAmount] = useState<number | ''>('')
+  const [loanPurpose,setLoanPurpose] = useState('')
   const [loading,setLoading] = useState(false)
   const router = useRouter()
 
@@ -16,6 +18,14 @@ export default function Step4(){
     if(!applicationId){ alert('No application id'); return }
     setLoading(true)
     try{
+      // First, save the user's loan request (amount & purpose)
+      if(!loanAmount || !loanPurpose){
+        alert('Please enter loan amount and purpose')
+        setLoading(false)
+        return
+      }
+      await API.post('/loan/request',{ applicationId: Number(applicationId), loanAmount: Number(loanAmount), loanPurpose })
+
       await API.post('/loan/consent',{ applicationId: Number(applicationId), smsConsent, callConsent, emailConsent })
 
       // final submit - include UTM if present
@@ -39,6 +49,12 @@ export default function Step4(){
     <div className="p-6 max-w-xl mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Review & Consent (Step 4)</h2>
       <form onSubmit={submitAll}>
+        <label className="block mb-2">Loan Amount
+          <input value={loanAmount as any} onChange={e=>setLoanAmount(e.target.value? Number(e.target.value) : '')} type="number" className="block w-full p-2 border rounded" />
+        </label>
+        <label className="block mb-4">Loan Purpose
+          <input value={loanPurpose} onChange={e=>setLoanPurpose(e.target.value)} className="block w-full p-2 border rounded" />
+        </label>
         <label className="block mb-2"><input type="checkbox" checked={smsConsent} onChange={e=>setSmsConsent(e.target.checked)} /> SMS Consent</label>
         <label className="block mb-2"><input type="checkbox" checked={callConsent} onChange={e=>setCallConsent(e.target.checked)} /> Call Consent</label>
         <label className="block mb-4"><input type="checkbox" checked={emailConsent} onChange={e=>setEmailConsent(e.target.checked)} /> Email Consent</label>

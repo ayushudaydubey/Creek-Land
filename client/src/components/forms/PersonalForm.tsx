@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import API from "@/lib/api";
 
 type RegisterForm = {
@@ -48,6 +49,7 @@ export default function PersonalInfoForm() {
   const [jornayaLeadId, setJornayaLeadId] = useState("");
   const [trustedFormCertUrl, setTrustedFormCertUrl] = useState("");
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -153,13 +155,9 @@ export default function PersonalInfoForm() {
       setApplicationId(appId);
       localStorage.setItem("applicationId", String(appId));
 
-      // Do not auto-submit identity/bank/request/consent/submit here.
-      // The user should complete identity and bank details in the next step/page.
-      setMessage(
-        "OTP verified and application created. Continue to the next step to complete identity and bank information. Application ID: " +
-          appId
-      );
-      setStep("done");
+      // Redirect user to the identity verification page so they can complete details
+      setMessage(`OTP verified and application created. Redirecting to identity step. Application ID: ${appId}`);
+      router.push("/apply/step2-personal");
     } catch (err: any) {
       const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
       console.error("verifyOtp error:", err?.response || err);

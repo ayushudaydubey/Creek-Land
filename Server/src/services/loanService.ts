@@ -22,7 +22,13 @@ export const saveIdentity = async (data: IdentityPayload) => {
 
 export const saveBank = async (data: BankPayload) => {
 
-  const bankName = await getBankName(data.routingNumber)
+  let bankName: string | null = null
+  try {
+    bankName = await getBankName(data.routingNumber)
+  } catch (err) {
+    // If bank lookup fails (network/CORS/external API), continue without bank name
+    bankName = null
+  }
 
   const result = await saveBankDetails(
     data.applicationId,
