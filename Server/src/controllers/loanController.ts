@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { saveBank, saveConsent, saveIdentity, saveLoan, submitLoan } from "../services/loanService"
+import { saveBank, saveConsent, saveIdentity, saveLoan, submitLoan, createApplication } from "../services/loanService"
 import { log } from "node:console"
 
 export const identityController = async (req: Request, res: Response) => {
@@ -198,6 +198,17 @@ export const submitLoanController = async (req: Request, res: Response) => {
       message: error.message
     })
 
+  }
+
+}
+
+export const createApplicationController = async (req: Request, res: Response) => {
+  try {
+    const result = await createApplication()
+
+    res.status(201).json({ message: "Application created", data: result })
+  } catch (error: any) {
+    res.status(500).json({ message: error.message })
   }
 
 }

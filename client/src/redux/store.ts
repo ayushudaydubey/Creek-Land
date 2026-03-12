@@ -3,8 +3,8 @@ import applicationReducer from "./slices/applicationSlice";
 import authReducer from "./slices/authSlice";
 
 export const store = configureStore({
-  reducer: {
-    application: applicationReducer,
-    auth: authReducer,
-  },
+reducer: {
+application: applicationReducer,
+auth: authReducer
+}
 });

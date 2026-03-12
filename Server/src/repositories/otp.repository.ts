@@ -9,21 +9,56 @@ const getVerifyServiceSid = (): string => {
 }
 
 export const sendOTPRepo = async (phone: string) => {
-  const serviceSid = getVerifyServiceSid()
-  return await client.verify.v2
-    .services(serviceSid)
-    .verifications.create({
+  // Allow a simple local mock for development: set TWILIO_MOCK=true in Server/.env
+  if (process.env.TWILIO_MOCK === "true") {
+    return {
+      sid: "MOCK_SID",
       to: phone,
-      channel: "sms"
-    })
+      status: "pending"
+    }
+  }
+
+  const serviceSid = getVerifyServiceSid()
+  try {
+    const resp = await client.verify.v2
+      .services(serviceSid)
+      .verifications.create({
+        to: phone,
+        channel: "sms"
+      })
+
+    console.log("Twilio verification created:", resp)
+    return resp
+  } catch (err: any) {
+    // surface Twilio error message
+    const msg = err?.message || JSON.stringify(err)
+    throw new Error(`Twilio sendOTP failed: ${msg}`)
+  }
 }
 
 export const verifyOTPRepo = async (phone: string, code: string) => {
-  const serviceSid = getVerifyServiceSid()
-  return await client.verify.v2
-    .services(serviceSid)
-    .verificationChecks.create({
+  // If mocking, return approved for any code === '000000' (dev shortcut), otherwise fake
+  if (process.env.TWILIO_MOCK === "true") {
+    return {
+      sid: "MOCK_VERIFY",
       to: phone,
-      code: code
-    })
+      status: "approved"
+    }
+  }
+
+  const serviceSid = getVerifyServiceSid()
+  try {
+    const resp = await client.verify.v2
+      .services(serviceSid)
+      .verificationChecks.create({
+        to: phone,
+        code: code
+      })
+
+    console.log("Twilio verification check:", resp)
+    return resp
+  } catch (err: any) {
+    const msg = err?.message || JSON.stringify(err)
+    throw new Error(`Twilio verifyOTP failed: ${msg}`)
+  }
 }

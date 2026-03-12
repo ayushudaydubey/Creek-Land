@@ -44,6 +44,20 @@ export const saveBankDetails = async (
 
 };
 
+export const createLoanApplication = async (): Promise<{ id: number }> => {
+  const query = `
+  INSERT INTO loan_applications
+  (status, created_at, updated_at)
+  VALUES ('pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  RETURNING id
+  `
+
+  const result = await db.query(query)
+
+  return result.rows[0]
+
+}
+
 export const saveIdentityDetails = async (
   data: IdentityPayload
 ): Promise<{ id: number }> => {
