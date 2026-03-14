@@ -1,31 +1,89 @@
-import { Request,Response } from "express"
+import { Request, Response } from "express"
+
 import {
- fetchApplications,
- fetchApplication,
- changeApplicationStatus
+  fetchApplications,
+  fetchApplication,
+  changeApplicationStatus
 } from "../services/adminService"
 
-export const getApplicationsController = async (req:Request,res:Response)=>{
 
- const data = await fetchApplications()
+// GET ALL APPLICATIONS
+export const getApplicationsController = async (req: Request, res: Response) => {
 
- res.json(data)
+  try {
+
+    const data = await fetchApplications()
+
+    res.json(data)
+
+  } catch (err: any) {
+
+    console.error(err)
+
+    res.status(500).json({
+      message: err.message || "Server error"
+    })
+
+  }
+
 }
 
-export const getApplicationController = async (req:Request,res:Response)=>{
 
- const id = Number(req.params.id)
+// GET SINGLE APPLICATION
+export const getApplicationController = async (req: Request, res: Response) => {
 
- const data = await fetchApplication(id)
+  try {
 
- res.json(data)
+    const id = Number(req.params.id)
+
+    const data = await fetchApplication(id)
+
+    if (!data) {
+      return res.status(404).json({
+        message: "Application not found"
+      })
+    }
+
+    res.json(data)
+
+  } catch (err: any) {
+
+    console.error(err)
+
+    res.status(500).json({
+      message: err.message || "Server error"
+    })
+
+  }
+
 }
 
-export const updateStatusController = async (req:Request,res:Response)=>{
 
- const {id,status} = req.body
+// UPDATE APPLICATION STATUS
+export const updateStatusController = async (req: Request, res: Response) => {
 
- const result = await changeApplicationStatus(id,status)
+  try {
 
- res.json(result)
+    const { id, status } = req.body
+
+    if (!id || !status) {
+      return res.status(400).json({
+        message: "id and status are required"
+      })
+    }
+
+    const result = await changeApplicationStatus(id, status)
+
+    res.json(result)
+
+  } catch (err: any) {
+
+    console.error(err)
+
+    res.status(500).json({
+      message: err.message || "Server error"
+    })
+
+  }
+
 }

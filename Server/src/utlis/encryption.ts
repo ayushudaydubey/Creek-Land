@@ -21,3 +21,15 @@ export const encrypt = (text: string): string => {
 
   return encrypted
 }
+
+export const decrypt = (encrypted: string): string => {
+  if (!encrypted) return ''
+  const decipher = crypto.createDecipheriv(algorithm, key, iv)
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8')
+  decrypted += decipher.final('utf8')
+  return decrypted
+}
+
+// Backwards-compatible aliases requested by the admin dashboard helpers
+export const encryptData = (text: string) => encrypt(text)
+export const decryptData = (encrypted: string) => decrypt(encrypted)

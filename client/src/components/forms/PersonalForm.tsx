@@ -142,7 +142,7 @@ export default function PersonalInfoForm() {
       setMessage("OTP verified. Creating application...");
 
       console.log("Creating application for verified phone", phoneToVerify);
-      const createRes = await API.post("/loan/create");
+      const createRes = await API.post("/loan/create", { country });
       // backend may return { data: { id } } or { id }
       const appId = createRes?.data?.data?.id ?? createRes?.data?.id ?? null;
 
@@ -154,6 +154,7 @@ export default function PersonalInfoForm() {
 
       setApplicationId(appId);
       localStorage.setItem("applicationId", String(appId));
+      localStorage.setItem("country", country);
 
       // Redirect user to the identity verification page so they can complete details
       setMessage(`OTP verified and application created. Redirecting to identity step. Application ID: ${appId}`);

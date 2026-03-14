@@ -27,7 +27,10 @@ export const verifyOTP = async (req: Request, res: Response) => {
 
     console.log("verifyOTP request received for phone:", phone, "code:", code)
 
-    const result = await verifyOTPService(phone, code)
+    // optional: client can pass verificationSid returned by sendOTP
+    const verificationSid = req.body?.verificationSid ?? req.query?.verificationSid ?? undefined
+
+    const result = await verifyOTPService(phone, code, verificationSid)
 
     console.log("verifyOTP result:", result)
 

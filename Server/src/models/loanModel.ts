@@ -1,8 +1,13 @@
+export type CountryCode = 'US' | 'CA' | 'IN' | string
+
 export interface BankPayload {
 
   applicationId: number
   accountNumber: string
-  routingNumber: string
+  routingNumber?: string
+  ifscCode?: string
+  country: CountryCode
+  bankName?: string | null
 
 }
 

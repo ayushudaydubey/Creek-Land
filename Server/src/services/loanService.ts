@@ -2,6 +2,7 @@ import { IdentityPayload, BankPayload, LoanRequestPayload, ConsentPayload, Submi
 import { encrypt } from "../utlis/encryption"
 import { getBankName } from "../utlis/bankLookup"
 import { saveIdentityDetails, saveBankDetails, saveLoanRequest, saveConsentDetails, submitLoanApplication, createLoanApplication } from "../repositories/laonRepository"
+import { validateBankPayload, ValidationError } from "../validations/bankValidation"
 
 export const saveIdentity = async (data: IdentityPayload) => {
 
@@ -21,20 +22,42 @@ export const saveIdentity = async (data: IdentityPayload) => {
 }
 
 export const saveBank = async (data: BankPayload) => {
-
-  let bankName: string | null = null
+  // Validate payload based on country
+  let validated
   try {
-    bankName = await getBankName(data.routingNumber)
+    validated = validateBankPayload({
+      accountNumber: data.accountNumber,
+      routingNumber: data.routingNumber,
+      ifscCode: data.ifscCode,
+      country: data.country,
+      bankName: data.bankName || null
+    })
   } catch (err) {
-    // If bank lookup fails (network/CORS/external API), continue without bank name
-    bankName = null
+    if (err instanceof ValidationError) throw err
+    throw new Error('Invalid bank payload')
   }
 
+  // Perform bank lookup only for routing numbers (US/CA)
+  let lookupName: string | null = null
+  if (validated.routingNumber) {
+    try {
+      lookupName = await getBankName(validated.routingNumber)
+    } catch (err) {
+      lookupName = null
+    }
+  }
+
+  // prefer provided bankName (eg. India) otherwise use lookup
+  const finalBankName = (validated as any).bankName || lookupName || null
+
+  // Persist bank details. Encryption and masking handled in repository.
   const result = await saveBankDetails(
     data.applicationId,
-    data.accountNumber,
-    data.routingNumber,
-    bankName
+    validated.accountNumber,
+    validated.routingNumber,
+    validated.ifscCode,
+    validated.country,
+    finalBankName
   )
 
   if (!result) {
@@ -43,7 +66,8 @@ export const saveBank = async (data: BankPayload) => {
 
   return {
     applicationId: result.id,
-    bankName
+    bankName: finalBankName,
+    country: result.country
   }
 
 }
@@ -104,6 +128,6 @@ export const submitLoan = async (data: SubmitApplicationPayload) => {
 
 }
 
-export const createApplication = async () => {
-  return await createLoanApplication()
+export const createApplication = async (country?: string | null) => {
+  return await createLoanApplication(country)
 }

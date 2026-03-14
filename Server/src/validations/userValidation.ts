@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const userSchema = z.object({
   full_name: z.string().min(2),
-  dob: z.string(),
+  dob: z.string().refine((v) => /^\d{4}-\d{2}-\d{2}$/.test(v), { message: 'dob must be in YYYY-MM-DD format' }),
   phone: z.string(),
   email: z.string().email(),
   address: z.string(),

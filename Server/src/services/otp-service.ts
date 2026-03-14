@@ -5,8 +5,8 @@ export const sendOTPService = async (phone: string) => {
   return response
 }
 
-export const verifyOTPService = async (phone: string, code: string) => {
-  const response = await verifyOTPRepo(phone, code)
+export const verifyOTPService = async (phone: string, code: string, verificationSid?: string) => {
+  const response = await verifyOTPRepo(phone, code, verificationSid)
 
   if (response.status !== "approved") {
     throw new Error("Invalid OTP")

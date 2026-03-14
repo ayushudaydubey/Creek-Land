@@ -6,7 +6,8 @@ export const identityController = async (req: Request, res: Response) => {
 
   try {
 
-    const { applicationId, ssn, driverLicense, state } = req.body
+    const body = req.body || {}
+    const { applicationId, ssn, driverLicense, state } = body
 
     if (!applicationId || !ssn || !driverLicense || !state) {
 
@@ -43,12 +44,13 @@ export const bankController = async (req: Request, res: Response) => {
 
   try {
 
-    const { applicationId, accountNumber, routingNumber } = req.body;
+    const body = req.body || {}
+    const { applicationId, accountNumber, routingNumber, ifscCode, country, bankName } = body;
 
-    if (!applicationId || !accountNumber || !routingNumber) {
+    if (!applicationId || !accountNumber || !country) {
 
       return res.status(400).json({
-        message: "Missing required fields"
+        message: "Missing required fields: applicationId, accountNumber, country"
       });
 
     }
@@ -56,7 +58,10 @@ export const bankController = async (req: Request, res: Response) => {
     const result = await saveBank({
       applicationId,
       accountNumber,
-      routingNumber
+      routingNumber,
+      ifscCode,
+      country,
+      bankName
     });
 
     res.json({
@@ -65,6 +70,11 @@ export const bankController = async (req: Request, res: Response) => {
     });
 
   } catch (error: any) {
+
+    // validation errors should be client errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message })
+    }
 
     res.status(500).json({
       message: error.message
@@ -80,7 +90,8 @@ export const loanRequestController = async (req: Request, res: Response) => {
 
   try {
 
-    const { applicationId, loanAmount, loanPurpose } = req.body
+    const body = req.body || {}
+    const { applicationId, loanAmount, loanPurpose } = body
 
     if (!applicationId || !loanAmount || !loanPurpose) {
       return res.status(400).json({
@@ -115,6 +126,7 @@ export const consentController = async (req: Request, res: Response) => {
 
   try {
 
+    const body = req.body || {}
     const {
       applicationId,
       smsConsent,
@@ -122,7 +134,7 @@ export const consentController = async (req: Request, res: Response) => {
       emailConsent,
       jornayaLeadId,
       trustedFormCertUrl
-    } = req.body
+    } = body
 
     if (!applicationId) {
       return res.status(400).json({
@@ -161,12 +173,13 @@ export const submitLoanController = async (req: Request, res: Response) => {
 
   try {
 
+    const body = req.body || {}
     const {
       applicationId,
       utmSource,
       utmMedium,
       utmCampaign
-    } = req.body
+    } = body
 
     const ipAddress =
       req.headers["x-forwarded-for"] || req.socket.remoteAddress
@@ -204,7 +217,8 @@ export const submitLoanController = async (req: Request, res: Response) => {
 
 export const createApplicationController = async (req: Request, res: Response) => {
   try {
-    const result = await createApplication()
+    const country = req?.body?.country ?? null
+    const result = await createApplication(country)
 
     res.status(201).json({ message: "Application created", data: result })
   } catch (error: any) {

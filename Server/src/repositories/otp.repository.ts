@@ -30,13 +30,16 @@ export const sendOTPRepo = async (phone: string) => {
     console.log("Twilio verification created:", resp)
     return resp
   } catch (err: any) {
-    // surface Twilio error message
+    // surface Twilio error message with extra context
     const msg = err?.message || JSON.stringify(err)
+    const code = err?.code
+    const more = err?.moreInfo
+    console.error('Twilio sendOTP error', { code, message: msg, moreInfo: more, err })
     throw new Error(`Twilio sendOTP failed: ${msg}`)
   }
 }
 
-export const verifyOTPRepo = async (phone: string, code: string) => {
+export const verifyOTPRepo = async (phone: string, code: string, verificationSid?: string) => {
   // If mocking, return approved for any code === '000000' (dev shortcut), otherwise fake
   if (process.env.TWILIO_MOCK === "true") {
     return {
@@ -48,17 +51,37 @@ export const verifyOTPRepo = async (phone: string, code: string) => {
 
   const serviceSid = getVerifyServiceSid()
   try {
-    const resp = await client.verify.v2
-      .services(serviceSid)
-      .verificationChecks.create({
-        to: phone,
-        code: code
-      })
+    let resp
+    if (verificationSid) {
+      // Use verification SID returned by sendOTP to target the exact verification
+      resp = await client.verify.v2
+        .services(serviceSid)
+        .verificationChecks.create({
+          verificationSid: verificationSid,
+          code: code
+        })
+    } else {
+      resp = await client.verify.v2
+        .services(serviceSid)
+        .verificationChecks.create({
+          to: phone,
+          code: code
+        })
+    }
 
     console.log("Twilio verification check:", resp)
     return resp
   } catch (err: any) {
     const msg = err?.message || JSON.stringify(err)
+    const code = err?.code
+    const more = err?.moreInfo
+    console.error('Twilio verifyOTP error', { code, message: msg, moreInfo: more, err })
+
+    // Twilio returns 20404 for resource not found — provide a clearer message
+    if (code === 20404) {
+      throw new Error('Twilio verifyOTP failed: Verification resource not found. Ensure the Verify Service SID is correct and that a verification was recently created for this phone number.')
+    }
+
     throw new Error(`Twilio verifyOTP failed: ${msg}`)
   }
 }

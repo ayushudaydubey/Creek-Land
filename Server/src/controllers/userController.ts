@@ -8,6 +8,7 @@ export const registerUserController = async (
 ) => {
   try {
 
+    console.log('registerUserController received body dob=', req.body?.dob)
     const validatedData = userRegisterSchema.parse(req.body)
 
     const user = await registerUser(validatedData)

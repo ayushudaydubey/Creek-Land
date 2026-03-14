@@ -22,6 +22,12 @@ export const registerUser = async (data: userModel) => {
   data.password = hashedPassword
   data.role = data.role ?? "user"
 
+  // NOTE: Users table stores `dob` as a DATE column. Storing an encrypted
+  // hex string into that column causes a DB error. Keep `dob` as the
+  // original date value for now. To store encrypted DOB you should add
+  // a dedicated text column (e.g. `dob_encrypted`) and migrate existing
+  // rows. See README or ask me to create a migration script.
+
   const user = await createUser(data)
 
   return user
